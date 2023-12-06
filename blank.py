@@ -1,15 +1,17 @@
 """Day XXX."""
+from pathlib import Path
 
 
 def get_data():
-    with open("day_XXX.txt", "r") as f:
+    cur_dir = Path(__file__).parent.absolute()
+    with open(cur_dir / "day_XXX.txt", "r") as f:
         data = f.read().strip().split("\n")
 
     return data
 
 
 def part_1():
-    pass
+    data = get_data()
 
 
 def part_2():
