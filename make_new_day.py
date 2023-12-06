@@ -6,13 +6,19 @@ import sys
 import requests
 import os
 from pathlib import Path
+import datetime
+
 
 SESSION_ID = os.environ["AOC_SESSION_ID"]
+current_year = datetime.datetime.now().year
+
+if not SESSION_ID:
+    raise ValueError("Session ID is not found in the envvars!")
 
 
 def getPuzzleForDayX(day: int):
     # Go to the webpage and download the puzzle input into a variable
-    url = f"https://adventofcode.com/2022/day/{day}/input"
+    url = f"https://adventofcode.com/{current_year}/day/{day}/input"
     page_content = requests.get(url, cookies={"session": SESSION_ID}).text
     return page_content
 
@@ -25,7 +31,7 @@ if __name__ == "__main__":
     day = sys.argv[1]
     page_content = getPuzzleForDayX(int(day))
     cur_path = Path(__file__).resolve().parent
-    day_path = cur_path / f"day_{day}"
+    day_path = cur_path / f"{current_year}" / f"day_{day}"
     day_path.mkdir(exist_ok=True)
 
     if not (day_path / f"day_{day}.txt").exists():
