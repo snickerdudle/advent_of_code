@@ -5,13 +5,13 @@ from pathlib import Path
 def get_data():
     cur_dir = Path(__file__).parent.absolute()
     with open(cur_dir / "day_XXX.txt", "r") as f:
-        data = f.read().strip().split("\n")
+        raw_data = f.read().strip().split("\n")
 
-    return data
+    return raw_data
 
 
 def part_1():
-    data = get_data()
+    raw_data = get_data()
 
 
 def part_2():
