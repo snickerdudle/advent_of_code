@@ -2,6 +2,7 @@
 from pathlib import Path
 from tqdm import tqdm
 from collections import Counter
+from functools import cache
 
 
 hashed_possibilities = {}
@@ -64,15 +65,81 @@ def part_1():
     return_val = 0
 
     for data, order in tqdm(raw_data, leave=False):
-        cur_pos, cur_order = generateAllPossibleCombinations(data)
-        f = filterByOrder(cur_pos, order)
-        return_val += len(f)
+        return_val += iterative_approach(data, tuple(order))
 
     print(f"Result: {return_val}")
 
 
+@cache
+def iterative_approach(data, order, cur_count=0, last="."):
+    data = data + "." if data[-1] != "." else data
+    perms = 0
+    cur_idx = 0
+
+    while cur_idx < len(data) and order:
+        if cur_count > order[0]:
+            # We have overcounted on this group
+            return 0
+
+        cur_char = data[cur_idx]
+        if cur_char == "#":
+            if last == ".":
+                # if last[-1] == ".":
+                # We are entering a new group
+                cur_count = 1
+            else:
+                cur_count += 1
+        elif cur_char == ".":
+            # if last[-1] == "#":
+            if last == "#":
+                if cur_count != order[0]:
+                    # We have over/undercounted on the latest group
+                    return 0
+                order = order[1:]
+                cur_count = 0
+        elif cur_char == "?":
+            # Here we have to try both options
+            # First we try with a #
+            perms += iterative_approach(
+                data[cur_idx + 1 :],
+                order,
+                cur_count=(1 if last == "." else cur_count + 1),
+                last="#",
+            )
+            # Then we try with a . - here we need to check that the previous
+            # group is not undercounted
+            if last == "#":
+                # Make sure the count is correct
+                if cur_count != order[0]:
+                    return perms
+                else:
+                    perms += iterative_approach(
+                        data[cur_idx + 1 :], order[1:], 0, last="."
+                    )
+            else:
+                perms += iterative_approach(data[cur_idx + 1 :], order, 0, last=".")
+
+            return perms
+        cur_idx += 1
+        last = cur_char
+        # last = cur_char
+
+    if not order:
+        return 1 if "#" not in data[cur_idx:] else 0
+    else:
+        return 1 if len(order) == 1 and cur_count == order[0] else 0
+
+
 def part_2():
-    pass
+    raw_data = get_data()
+    result = 0
+
+    for data, order in tqdm(raw_data, leave=False):
+        data = "?".join([data for _ in range(5)])
+        order = tuple(order * 5)
+        result += iterative_approach(data, order)
+
+    print(f"Result: {result}")
 
 
 if __name__ == "__main__":
